@@ -1,0 +1,41 @@
+{
+  "source": "benchmark\\programs\\test_arith.cpp",
+  "runs": 5,
+  "results": [
+    {
+      "strategy": "O0",
+      "flags": "-O0",
+      "compile_time": 0.4661,
+      "exec_time": 0.2299,
+      "binary_size": 38912
+    },
+    {
+      "strategy": "O1",
+      "flags": "-O1",
+      "compile_time": 0.6147,
+      "exec_time": 0.1908,
+      "binary_size": 39936
+    },
+    {
+      "strategy": "O2",
+      "flags": "-O2",
+      "compile_time": 0.5005,
+      "exec_time": 0.1905,
+      "binary_size": 39936
+    },
+    {
+      "strategy": "O3",
+      "flags": "-O3",
+      "compile_time": 0.4457,
+      "exec_time": 0.1975,
+      "binary_size": 39936
+    },
+    {
+      "strategy": "APEX",
+      "flags": "-O2 -funroll-loops",
+      "compile_time": 0.5492,
+      "exec_time": 0.1913,
+      "binary_size": 39936
+    }
+  ]
+}
