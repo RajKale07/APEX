@@ -1,0 +1,9 @@
+*.exe
+*.bc
+*.ll
+*.o
+*.obj
+__pycache__/
+*.pyc
+build/
+.apex_cache/
