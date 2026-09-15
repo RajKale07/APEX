@@ -1,0 +1,253 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #0d0d1a;
+  color: #e0e0f0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(90deg, #0f0f23 0%, #1a1a3e 100%);
+  border-bottom: 1px solid #2a2a4a;
+  padding: 0 2rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+}
+.header-inner { display: flex; align-items: center; gap: 1rem; }
+.logo { font-size: 1.4rem; font-weight: 700; color: #10b981; letter-spacing: 2px; }
+.tagline { font-size: 0.85rem; color: #6b7280; }
+
+/* ── Main layout ── */
+.main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+/* ── Cards ── */
+.card {
+  background: #13132a;
+  border: 1px solid #2a2a4a;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.card h2 { font-size: 1rem; font-weight: 600; color: #c0c0e0; margin-bottom: 1rem; }
+
+/* ── Code Input ── */
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.card-header h2 { margin-bottom: 0; }
+.tabs { display: flex; gap: 0.5rem; }
+.tab {
+  padding: 0.3rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid #2a2a4a;
+  background: transparent;
+  color: #8080a0;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.15s;
+}
+.tab.active, .tab:hover { background: #1e1e4a; color: #e0e0f0; border-color: #4a4a8a; }
+
+.examples { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+.example-btn {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid #3a3a6a;
+  background: #1a1a3a;
+  color: #a0a0c0;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.15s;
+}
+.example-btn:hover { background: #2a2a5a; color: #e0e0f0; }
+
+.code-editor {
+  width: 100%;
+  background: #0a0a18;
+  border: 1px solid #2a2a4a;
+  border-radius: 8px;
+  color: #a0f0c0;
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 0.82rem;
+  padding: 1rem;
+  resize: vertical;
+  outline: none;
+  line-height: 1.6;
+}
+.code-editor:focus { border-color: #10b981; }
+
+.filename-input {
+  margin-top: 0.5rem;
+  width: 220px;
+  background: #0a0a18;
+  border: 1px solid #2a2a4a;
+  border-radius: 6px;
+  color: #c0c0e0;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.upload-area {
+  border: 2px dashed #2a2a5a;
+  border-radius: 10px;
+  padding: 3rem;
+  text-align: center;
+  cursor: pointer;
+  color: #6060a0;
+  transition: all 0.2s;
+  margin-bottom: 1rem;
+}
+.upload-area:hover { border-color: #10b981; color: #10b981; }
+
+.run-btn {
+  margin-top: 1rem;
+  padding: 0.65rem 2rem;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  letter-spacing: 0.5px;
+}
+.run-btn:hover { opacity: 0.88; }
+
+/* ── Loading ── */
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #6060a0;
+}
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid #2a2a4a;
+  border-top-color: #10b981;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Error ── */
+.error-box {
+  background: #2a0a0a;
+  border: 1px solid #7f1d1d;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  color: #fca5a5;
+  margin-bottom: 1.5rem;
+}
+
+/* ── Results layout ── */
+.results-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+@media (max-width: 768px) { .results-top { grid-template-columns: 1fr; } }
+
+/* ── Metrics table ── */
+.metrics-table { width: 100%; border-collapse: collapse; }
+.metrics-table tr { border-bottom: 1px solid #1e1e3a; }
+.metrics-table tr:last-child { border-bottom: none; }
+.metric-label { padding: 0.45rem 0; color: #8080a0; font-size: 0.88rem; }
+.metric-value { padding: 0.45rem 0; text-align: right; font-weight: 600; color: #10b981; font-size: 0.95rem; }
+
+/* ── Strategy panel ── */
+.strategy-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #10b981;
+  margin-bottom: 0.75rem;
+}
+.strategy-flags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.flag-badge {
+  background: #0a2a1a;
+  border: 1px solid #10b981;
+  color: #10b981;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.85rem;
+}
+.strategy-score {
+  font-size: 0.85rem;
+  color: #6060a0;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.strategy-score strong { color: #c0c0e0; }
+.confidence-tag {
+  background: #1a1a3a;
+  border: 1px solid #3a3a6a;
+  color: #8080c0;
+  padding: 0.1rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.75rem;
+}
+.reasoning h3 { font-size: 0.85rem; color: #6060a0; margin-bottom: 0.5rem; }
+.reason { color: #c0c0e0; font-size: 0.9rem; margin-bottom: 0.3rem; line-height: 1.5; }
+
+/* ── Benchmark ── */
+.benchmark-subtitle { font-size: 0.82rem; color: #6060a0; margin-bottom: 1rem; margin-top: -0.5rem; }
+.chart-wrap { margin-bottom: 1.5rem; }
+
+.bench-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.bench-table th {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  color: #6060a0;
+  border-bottom: 1px solid #2a2a4a;
+  font-weight: 500;
+}
+.bench-table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid #1a1a2e; }
+.bench-table tr:last-child td { border-bottom: none; }
+.best-row td { background: #0a1a12; }
+.strat-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 0.4rem;
+}
+.best-badge {
+  background: #10b981;
+  color: #000;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  margin-left: 0.4rem;
+}
+.flags-cell { font-family: monospace; color: #8080c0; font-size: 0.82rem; }
+.output-cell { font-family: monospace; color: #10b981; }
+
+/* ── IR Viewer ── */
+.ir-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+.ir-header h2 { margin-bottom: 0; }
+.toggle { font-size: 0.82rem; color: #6060a0; }
+.ir-content {
+  margin-top: 1rem;
+  background: #0a0a18;
+  border: 1px solid #2a2a4a;
+  border-radius: 8px;
+  padding: 1rem;
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 0.78rem;
+  color: #80c0a0;
+  overflow-x: auto;
+  white-space: pre;
+  max-height: 400px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
