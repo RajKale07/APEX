@@ -81,7 +81,10 @@ def compile_pipeline(source: str, opt_level: str = "O2"):
 
 def run_executable(exe_file: str):
     log.info(f"Running {exe_file}")
-    result = subprocess.run([exe_file], capture_output=True, text=True)
+    result = subprocess.run(
+        f'cmd /c "{exe_file}"',
+        shell=True, capture_output=True, text=True
+    )
     print(f"\n--- Program Output ---\n{result.stdout.strip()}\n----------------------\n")
     return result
 

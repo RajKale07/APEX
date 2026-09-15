@@ -45,7 +45,7 @@ def run_timed(exe: str) -> float:
     times = []
     for _ in range(RUNS):
         t0 = time.perf_counter()
-        r  = subprocess.run([exe], capture_output=True, text=True)
+        r  = subprocess.run(f'cmd /c "{exe}"', shell=True, capture_output=True, text=True)
         t1 = time.perf_counter()
         if r.returncode != 0:
             return -1.0
