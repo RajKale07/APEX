@@ -3,17 +3,17 @@ import type { Metrics } from "../types";
 interface Props { metrics: Metrics }
 
 const ROWS: [keyof Metrics, string, string][] = [
-  ["instructions",   "Instructions",    "Total number of LLVM IR instructions in the program. Higher = more complex code."],
-  ["basic_blocks",   "Basic Blocks",    "Straight-line code segments with no branches. More blocks = more control flow."],
-  ["functions",      "Functions",       "Number of function definitions found in the IR, including helper functions."],
-  ["loops",          "Loops",           "Number of loops detected via LLVM loop metadata. High loop count → loop optimization."],
-  ["max_loop_depth", "Max Loop Depth",  "Deepest nesting level of loops. Deeply nested loops are prime vectorization targets."],
-  ["branches",       "Branches",        "Conditional jumps (if/else, switch). High branch count → branch prediction matters."],
-  ["loads",          "Loads",           "Memory read operations. High loads → memory bandwidth is a bottleneck."],
-  ["stores",         "Stores",          "Memory write operations. High stores → cache pressure, aliasing matters."],
-  ["arithmetic",     "Arithmetic Ops",  "Add, sub, mul, div etc. High density → vectorization and instruction combining help."],
-  ["calls",          "Function Calls",  "Call/invoke instructions. High call density → inlining is a strong candidate."],
-  ["comparisons",    "Comparisons",     "icmp/fcmp instructions. High comparisons often accompany branch-heavy code."],
+  ["instructions",   "Instructions",   "Total LLVM IR instructions. Higher = more complex code."],
+  ["basic_blocks",   "Basic Blocks",   "Straight-line segments with no branches. More = more control flow."],
+  ["functions",      "Functions",      "Function definitions in the IR, including helpers."],
+  ["loops",          "Loops",          "Loops detected via LLVM metadata. High count → loop optimization."],
+  ["max_loop_depth", "Loop Depth",     "Deepest loop nesting. Deeply nested loops are vectorization targets."],
+  ["branches",       "Branches",       "Conditional jumps. High count → branch prediction matters."],
+  ["loads",          "Loads",          "Memory reads. High loads → memory bandwidth is a bottleneck."],
+  ["stores",         "Stores",         "Memory writes. High stores → cache pressure, aliasing matters."],
+  ["arithmetic",     "Arithmetic",     "Add/sub/mul/div ops. High density → vectorization helps."],
+  ["calls",          "Calls",          "Call instructions. High density → inlining is a strong candidate."],
+  ["comparisons",    "Comparisons",    "icmp/fcmp instructions. High count accompanies branch-heavy code."],
 ];
 
 export default function MetricsPanel({ metrics }: Props) {
@@ -21,22 +21,32 @@ export default function MetricsPanel({ metrics }: Props) {
   const max    = Math.max(...values, 1);
 
   return (
-    <div className="card metrics-panel">
-      <h2>📊 IR Analysis</h2>
-      {ROWS.map(([key, label, tip], i) => {
-        const val = metrics[key] as number;
-        const pct = Math.round((val / max) * 100);
-        return (
-          <div className="metric-row" key={key} style={{ animationDelay: `${i * 0.04}s` }}>
-            <span className="metric-label">{label}</span>
-            <div className="metric-bar-wrap">
-              <div className="metric-bar" style={{ width: `${pct}%` }} />
-            </div>
-            <span className="metric-value">{val}</span>
-            <div className="metric-tooltip">{tip}</div>
-          </div>
-        );
-      })}
+    <div className="panel">
+      <div className="panel-header">
+        <span className="panel-title">
+          <span className="panel-title-icon">◈</span>
+          IR Analysis
+        </span>
+        <span className="panel-badge">{values.reduce((a, b) => a + b, 0)} total ops</span>
+      </div>
+      <div className="panel-body">
+        <div className="metrics-grid">
+          {ROWS.map(([key, label, tip]) => {
+            const val = metrics[key] as number;
+            const pct = Math.round((val / max) * 100);
+            return (
+              <div className="metric-row" key={key}>
+                <span className="metric-label">{label}</span>
+                <div className="metric-track">
+                  <div className="metric-fill" style={{ width: `${pct}%` }} />
+                </div>
+                <span className="metric-val">{val}</span>
+                <div className="metric-tip">{tip}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
