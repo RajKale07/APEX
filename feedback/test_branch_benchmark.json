@@ -1,40 +1,40 @@
 {
   "source": "benchmark\\programs\\test_branch.cpp",
-  "runs": 5,
+  "runs": 7,
   "results": [
     {
       "strategy": "O0",
       "flags": "-O0",
-      "compile_time": 0.5266,
-      "exec_time": 0.0507,
+      "compile_time": 1.0739,
+      "exec_time": 0.2825,
       "binary_size": 38912
     },
     {
       "strategy": "O1",
       "flags": "-O1",
-      "compile_time": 0.475,
-      "exec_time": 0.0434,
+      "compile_time": 1.2291,
+      "exec_time": 0.0784,
       "binary_size": 38912
     },
     {
       "strategy": "O2",
       "flags": "-O2",
-      "compile_time": 0.5244,
-      "exec_time": 0.0485,
+      "compile_time": 0.5572,
+      "exec_time": 0.0593,
       "binary_size": 38912
     },
     {
       "strategy": "O3",
       "flags": "-O3",
-      "compile_time": 0.4767,
-      "exec_time": 0.0501,
+      "compile_time": 0.5009,
+      "exec_time": 0.054,
       "binary_size": 38912
     },
     {
       "strategy": "APEX",
       "flags": "-O3 -fvectorize -fslp-vectorize",
-      "compile_time": 0.4519,
-      "exec_time": 0.043,
+      "compile_time": 0.6151,
+      "exec_time": 0.0676,
       "binary_size": 38912
     }
   ]

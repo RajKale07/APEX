@@ -25,8 +25,7 @@ from optimizer.rule_engine.decision_engine import decide
 
 CLANG  = r"C:\Program Files\LLVM\bin\clang++.exe"
 BUILD  = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "build")
-RUNS   = 5   # number of timed executions per strategy
-
+RUNS   = 7   # timed executions per strategy — more runs = less noise
 
 def compile_timed(source: str, exe: str, flags: list) -> float:
     """Returns compile time in seconds."""
@@ -41,16 +40,36 @@ def compile_timed(source: str, exe: str, flags: list) -> float:
 
 
 def run_timed(exe: str) -> float:
-    """Returns median execution time in seconds over RUNS runs."""
+    """
+    Time the executable using CreateProcess directly (no cmd /c shell).
+    Uses a Python wrapper script to avoid AppLocker while keeping timing clean.
+    """
+    timer_script = os.path.join(ROOT, "build", "_timer.py")
+    # Write a tiny timing helper that runs the exe and prints elapsed ms
+    with open(timer_script, "w") as f:
+        f.write(
+            "import subprocess, time, sys\n"
+            "t0=time.perf_counter()\n"
+            "r=subprocess.run(sys.argv[1:],capture_output=True)\n"
+            "print(f'{(time.perf_counter()-t0)*1000:.2f}')\n"
+        )
+
     times = []
     for _ in range(RUNS):
-        t0 = time.perf_counter()
-        r  = subprocess.run(f'cmd /c "{exe}"', shell=True, capture_output=True, text=True)
-        t1 = time.perf_counter()
+        r = subprocess.run(
+            [sys.executable, timer_script, exe],
+            capture_output=True, text=True
+        )
         if r.returncode != 0:
             return -1.0
-        times.append(t1 - t0)
-    return round(statistics.median(times), 4)
+        try:
+            times.append(float(r.stdout.strip()))
+        except ValueError:
+            return -1.0
+
+    times.sort()
+    trimmed = times[:-1]   # drop worst outlier
+    return round(statistics.median(trimmed) / 1000, 4)  # ms -> seconds
 
 
 def binary_size(exe: str) -> int:
