@@ -27,7 +27,7 @@ from feedback.feedback_engine import record_from_benchmark, best_known_strategy
 
 CLANG = r"C:\Program Files\LLVM\bin\clang++.exe"
 BUILD = os.path.join(ROOT, "build")
-RUNS  = 3
+RUNS  = 7
 
 app = FastAPI(title="APEX Adaptive Compiler", version="1.0.0")
 
@@ -49,16 +49,35 @@ def _compile_exe(source: str, exe: str, flags: list) -> float:
     return round(t1 - t0, 4)
 
 
+_TIMER_SCRIPT = os.path.join(BUILD, "_timer.py")
+
+def _ensure_timer():
+    os.makedirs(BUILD, exist_ok=True)
+    with open(_TIMER_SCRIPT, "w") as f:
+        f.write(
+            "import subprocess,time,sys\n"
+            "t0=time.perf_counter()\n"
+            "subprocess.run(sys.argv[1:],capture_output=True)\n"
+            "print(f'{(time.perf_counter()-t0)*1000:.2f}')\n"
+        )
+
 def _run_exe(exe: str) -> tuple[float, str]:
+    _ensure_timer()
     times = []
-    output = ""
+    # Capture output separately via cmd /c (only once, not timed)
+    out_r = subprocess.run(f'cmd /c "{exe}"', shell=True, capture_output=True, text=True)
+    output = out_r.stdout.strip()
     for _ in range(RUNS):
-        t0 = time.perf_counter()
-        r  = subprocess.run(f'cmd /c "{exe}"', shell=True, capture_output=True, text=True)
-        t1 = time.perf_counter()
-        times.append(t1 - t0)
-        output = r.stdout.strip()
-    return round(statistics.median(times), 4), output
+        r = subprocess.run(
+            [sys.executable, _TIMER_SCRIPT, exe],
+            capture_output=True, text=True
+        )
+        try:
+            times.append(float(r.stdout.strip()))
+        except ValueError:
+            return -1.0, output
+    times.sort()
+    return round(statistics.median(times[:-1]) / 1000, 4), output
 
 
 def _run_pipeline(source_path: str) -> dict:

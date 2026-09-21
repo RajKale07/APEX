@@ -1,40 +1,40 @@
 {
   "source": "benchmark\\programs\\test_arith.cpp",
-  "runs": 5,
+  "runs": 7,
   "results": [
     {
       "strategy": "O0",
       "flags": "-O0",
-      "compile_time": 0.4661,
-      "exec_time": 0.2299,
+      "compile_time": 0.7454,
+      "exec_time": -1.0,
       "binary_size": 38912
     },
     {
       "strategy": "O1",
       "flags": "-O1",
-      "compile_time": 0.6147,
-      "exec_time": 0.1908,
+      "compile_time": 3.4489,
+      "exec_time": 1.144,
       "binary_size": 39936
     },
     {
       "strategy": "O2",
       "flags": "-O2",
-      "compile_time": 0.5005,
-      "exec_time": 0.1905,
+      "compile_time": 1.6154,
+      "exec_time": 1.2075,
       "binary_size": 39936
     },
     {
       "strategy": "O3",
       "flags": "-O3",
-      "compile_time": 0.4457,
-      "exec_time": 0.1975,
+      "compile_time": 0.6871,
+      "exec_time": 1.2052,
       "binary_size": 39936
     },
     {
       "strategy": "APEX",
       "flags": "-O2 -funroll-loops",
-      "compile_time": 0.5492,
-      "exec_time": 0.1913,
+      "compile_time": 0.6346,
+      "exec_time": 1.1306,
       "binary_size": 39936
     }
   ]

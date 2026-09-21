@@ -1,41 +1,41 @@
 {
   "source": "benchmark\\programs\\test_loop.cpp",
-  "runs": 5,
+  "runs": 7,
   "results": [
     {
       "strategy": "O0",
       "flags": "-O0",
-      "compile_time": 0.5769,
-      "exec_time": 0.0312,
-      "binary_size": 38912
+      "compile_time": 0.8546,
+      "exec_time": 0.8412,
+      "binary_size": 47616
     },
     {
       "strategy": "O1",
       "flags": "-O1",
-      "compile_time": 0.4836,
-      "exec_time": 0.0324,
-      "binary_size": 38912
+      "compile_time": 0.5567,
+      "exec_time": 0.1769,
+      "binary_size": 41472
     },
     {
       "strategy": "O2",
       "flags": "-O2",
-      "compile_time": 0.4598,
-      "exec_time": 0.0675,
-      "binary_size": 38912
+      "compile_time": 0.6604,
+      "exec_time": 0.1008,
+      "binary_size": 41984
     },
     {
       "strategy": "O3",
       "flags": "-O3",
-      "compile_time": 0.516,
-      "exec_time": 0.0352,
-      "binary_size": 38912
+      "compile_time": 0.8096,
+      "exec_time": 0.1442,
+      "binary_size": 41984
     },
     {
       "strategy": "APEX",
-      "flags": "-O2 -funroll-loops",
-      "compile_time": 0.4749,
-      "exec_time": 0.0341,
-      "binary_size": 38912
+      "flags": "-O3 -finline-functions",
+      "compile_time": 0.8318,
+      "exec_time": 0.0877,
+      "binary_size": 41984
     }
   ]
 }
