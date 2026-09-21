@@ -17,44 +17,85 @@ export default function App() {
 
   return (
     <div className="app">
-      <header className="header">
-        <div className="header-inner">
-          <span className="logo">⚡ APEX</span>
-          <span className="tagline">Adaptive Compiler Architecture</span>
+      {/* ── Top bar ── */}
+      <header className="topbar">
+        <div className="topbar-logo">
+          <div className="logo-icon">⚡</div>
+          <span className="logo-text">APEX</span>
+          <span className="logo-sub">Adaptive Compiler Architecture</span>
         </div>
+        <nav className="topbar-nav">
+          <button className="nav-link active">Analyze</button>
+          <button className="nav-link">History</button>
+          <button className="nav-link">Docs</button>
+        </nav>
+        <div className="status-dot" title="Backend online" />
       </header>
 
-      <main className="main">
-        <div className="fade-up">
-          <CodeInput onResult={handleResult} onError={handleError} onLoading={setLoading} />
-        </div>
+      {/* ── Workspace ── */}
+      <div className="workspace">
+        {/* Left: code input */}
+        <aside className="left-pane">
+          <CodeInput
+            onResult={handleResult}
+            onError={handleError}
+            onLoading={setLoading}
+            loading={loading}
+          />
+        </aside>
 
-        {loading && (
-          <div className="loading">
-            <div className="spinner" />
-            <p>Running APEX pipeline…</p>
-            <div className="loading-steps">
-              <span className="loading-step">⚙ Compiling to IR</span>
-              <span className="loading-step">🔍 Analyzing</span>
-              <span className="loading-step">🧠 Deciding strategy</span>
-              <span className="loading-step">📊 Benchmarking</span>
+        {/* Right: results */}
+        <main className="right-pane">
+          {loading && (
+            <div className="loading-overlay">
+              <div className="spinner" />
+              <span className="loading-label">Running APEX pipeline…</span>
+              <div className="pipeline-steps">
+                {[
+                  ["⚙", "Compiling to LLVM IR"],
+                  ["🔍", "Analyzing IR metrics"],
+                  ["🧠", "Selecting strategy"],
+                  ["📊", "Benchmarking all levels"],
+                ].map(([icon, label]) => (
+                  <div className="pipeline-step" key={label}>
+                    <span className="step-icon">{icon}</span>
+                    <span>{label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {error && <div className="error-box">⚠ {error}</div>}
-
-        {result && !loading && (
-          <div className="results">
-            <div className="results-top">
-              <div className="fade-up fade-up-1"><MetricsPanel metrics={result.metrics} /></div>
-              <div className="fade-up fade-up-2"><StrategyPanel strategy={result.strategy} /></div>
+          {error && !loading && (
+            <div className="error-banner">
+              <span>⚠</span>
+              <span>{error}</span>
             </div>
-            <div className="fade-up fade-up-3"><BenchmarkChart benchmark={result.benchmark} /></div>
-            <div className="fade-up fade-up-4"><IRViewer ir={result.ir_snippet} /></div>
-          </div>
-        )}
-      </main>
+          )}
+
+          {!result && !loading && !error && (
+            <div className="empty-state">
+              <div className="empty-icon">⚡</div>
+              <div className="empty-title">Submit C++ code to begin</div>
+              <div className="empty-sub">
+                APEX will compile it to LLVM IR, analyze its characteristics,
+                pick the best optimization strategy, and benchmark all levels.
+              </div>
+            </div>
+          )}
+
+          {result && !loading && (
+            <>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+                <MetricsPanel metrics={result.metrics} />
+                <StrategyPanel strategy={result.strategy} />
+              </div>
+              <BenchmarkChart benchmark={result.benchmark} />
+              <IRViewer ir={result.ir_snippet} />
+            </>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

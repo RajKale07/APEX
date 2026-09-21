@@ -6,17 +6,20 @@ export default function IRViewer({ ir }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="card ir-card">
-      <div className="ir-header" onClick={() => setOpen(o => !o)}>
-        <h2>🔬 Generated LLVM IR</h2>
-        <span className="toggle">{open ? "▲ Hide IR" : "▼ Show IR"}</span>
+    <div className="panel">
+      <div className="panel-header">
+        <span className="panel-title">
+          <span className="panel-title-icon">⌥</span>
+          LLVM IR
+        </span>
+        <button className="ir-toggle-btn" onClick={() => setOpen(o => !o)}>
+          {open ? "▲ collapse" : "▼ expand"}
+        </button>
       </div>
       {!open && (
-        <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", marginTop: "0.5rem" }}>
-          The raw LLVM Intermediate Representation that APEX analyzed — click to expand.
-        </p>
+        <div className="ir-hint">Raw LLVM Intermediate Representation analyzed by APEX — click expand to view.</div>
       )}
-      {open && <pre className="ir-content">{ir}</pre>}
+      {open && <pre className="ir-pre">{ir}</pre>}
     </div>
   );
 }
