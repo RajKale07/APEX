@@ -7,7 +7,7 @@ const DISPLAY: Record<string, string> = {
 };
 
 const COLORS: Record<string, string> = {
-  O0: "#475569", O1: "#3b82f6", O2: "#8b5cf6", O3: "#f97316", APEX: "#22c55e",
+  O0: "#94a3b8", O1: "#3b82f6", O2: "#8b5cf6", O3: "#f97316", APEX: "#16a34a",
 };
 
 const LEVEL_WHEN: Record<string, string> = {
