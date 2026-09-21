@@ -529,6 +529,63 @@ body {
 .time-cell { font-weight: 600; color: var(--text-primary); }
 .time-best { color: var(--green); }
 
+/* ── APEX Explanation Box ── */
+.apex-explain-box {
+  border-radius: var(--radius-sm);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+  animation: fadeUp 0.3s ease both;
+}
+.apex-won {
+  background: var(--green-soft);
+  border: 1.5px solid #6ee7b7;
+}
+.apex-lost {
+  background: #fefce8;
+  border: 1.5px solid #fde68a;
+}
+.apex-explain-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.65rem;
+  color: var(--text-primary);
+}
+.apex-explain-box p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-bottom: 0.85rem;
+}
+.apex-explain-box code {
+  background: rgba(0,0,0,0.06);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'Cascadia Code', monospace;
+  font-size: 0.82rem;
+  color: var(--accent);
+}
+.apex-explain-stats {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(0,0,0,0.07);
+}
+.apex-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.apex-stat span {
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.apex-stat strong, .apex-stat code {
+  font-size: 0.88rem;
+}
+
 /* ── IR Viewer ── */
 .ir-header {
   display: flex;
