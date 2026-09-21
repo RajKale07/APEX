@@ -29,7 +29,7 @@
   --t:            0.18s cubic-bezier(0.4,0,0.2,1);
 }
 
-html { font-size: 14px; }
+html { font-size: 15px; }
 
 body {
   background: var(--bg);
@@ -40,12 +40,9 @@ body {
   line-height: 1.5;
 }
 
-::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
-
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
 
 @keyframes fadeIn {
