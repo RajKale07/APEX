@@ -17,24 +17,24 @@ export default function App() {
 
   return (
     <div className="app">
-      {/* ── Top bar ── */}
       <header className="topbar">
         <div className="topbar-logo">
           <div className="logo-icon">⚡</div>
-          <span className="logo-text">APEX</span>
+          <span>APEX</span>
           <span className="logo-sub">Adaptive Compiler Architecture</span>
         </div>
         <nav className="topbar-nav">
           <button className="nav-link active">Analyze</button>
           <button className="nav-link">History</button>
           <button className="nav-link">Docs</button>
+          <div className="status-pill">
+            <div className="status-dot" />
+            Backend live
+          </div>
         </nav>
-        <div className="status-dot" title="Backend online" />
       </header>
 
-      {/* ── Workspace ── */}
       <div className="workspace">
-        {/* Left: code input */}
         <aside className="left-pane">
           <CodeInput
             onResult={handleResult}
@@ -44,21 +44,21 @@ export default function App() {
           />
         </aside>
 
-        {/* Right: results */}
         <main className="right-pane">
           {loading && (
             <div className="loading-overlay">
-              <div className="spinner" />
-              <span className="loading-label">Running APEX pipeline…</span>
+              <div className="spinner-amber" />
+              <div className="loading-title">Running APEX pipeline…</div>
+              <div className="loading-sub">This takes 10–30 seconds</div>
               <div className="pipeline-steps">
                 {[
-                  ["⚙", "Compiling to LLVM IR"],
+                  ["⚙️", "Compiling to LLVM IR"],
                   ["🔍", "Analyzing IR metrics"],
                   ["🧠", "Selecting strategy"],
                   ["📊", "Benchmarking all levels"],
                 ].map(([icon, label]) => (
-                  <div className="pipeline-step" key={label}>
-                    <span className="step-icon">{icon}</span>
+                  <div className="pipeline-step" key={label as string}>
+                    <span>{icon}</span>
                     <span>{label}</span>
                   </div>
                 ))}
@@ -68,7 +68,7 @@ export default function App() {
 
           {error && !loading && (
             <div className="error-banner">
-              <span>⚠</span>
+              <span>⚠️</span>
               <span>{error}</span>
             </div>
           )}
@@ -78,15 +78,28 @@ export default function App() {
               <div className="empty-icon">⚡</div>
               <div className="empty-title">Submit C++ code to begin</div>
               <div className="empty-sub">
-                APEX will compile it to LLVM IR, analyze its characteristics,
-                pick the best optimization strategy, and benchmark all levels.
+                APEX compiles your code, analyzes the LLVM IR, picks the best
+                optimization strategy, and benchmarks all levels side by side.
+              </div>
+              <div className="empty-steps">
+                {[
+                  "Paste or upload a C++ file on the left",
+                  "Click Run APEX — pipeline runs automatically",
+                  "See IR metrics, chosen strategy, and benchmark results",
+                  "APEX learns from each run to improve future picks",
+                ].map((s, i) => (
+                  <div className="empty-step" key={i}>
+                    <div className="empty-step-num">{i + 1}</div>
+                    <span>{s}</span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
           {result && !loading && (
             <>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.75rem" }}>
                 <MetricsPanel metrics={result.metrics} />
                 <StrategyPanel strategy={result.strategy} />
               </div>

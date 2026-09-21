@@ -1164,5 +1164,150 @@
     "exec_time": 0.021,
     "compile_time": 0.3382,
     "binary_size": 38912
+  },
+  {
+    "timestamp": "2026-09-21T15:26:19",
+    "source": "9ba84ade_calls.cpp",
+    "features": {
+      "instruction_count": 56,
+      "basic_block_count": 4,
+      "function_count": 7,
+      "loop_count": 1,
+      "max_loop_depth": 1,
+      "branch_count": 4,
+      "load_count": 11,
+      "store_count": 10,
+      "arithmetic_count": 5,
+      "call_count": 9,
+      "comparison_count": 1,
+      "loop_density": 0.25,
+      "branch_density": 0.0714,
+      "memory_density": 0.375,
+      "arithmetic_density": 0.0893,
+      "call_density": 0.1607
+    },
+    "strategy": "O0",
+    "flags": [
+      "-O0"
+    ],
+    "exec_time": 0.0711,
+    "compile_time": 0.8735,
+    "binary_size": 38912
+  },
+  {
+    "timestamp": "2026-09-21T15:26:19",
+    "source": "9ba84ade_calls.cpp",
+    "features": {
+      "instruction_count": 56,
+      "basic_block_count": 4,
+      "function_count": 7,
+      "loop_count": 1,
+      "max_loop_depth": 1,
+      "branch_count": 4,
+      "load_count": 11,
+      "store_count": 10,
+      "arithmetic_count": 5,
+      "call_count": 9,
+      "comparison_count": 1,
+      "loop_density": 0.25,
+      "branch_density": 0.0714,
+      "memory_density": 0.375,
+      "arithmetic_density": 0.0893,
+      "call_density": 0.1607
+    },
+    "strategy": "O1",
+    "flags": [
+      "-O1"
+    ],
+    "exec_time": 0.0523,
+    "compile_time": 0.7617,
+    "binary_size": 39424
+  },
+  {
+    "timestamp": "2026-09-21T15:26:19",
+    "source": "9ba84ade_calls.cpp",
+    "features": {
+      "instruction_count": 56,
+      "basic_block_count": 4,
+      "function_count": 7,
+      "loop_count": 1,
+      "max_loop_depth": 1,
+      "branch_count": 4,
+      "load_count": 11,
+      "store_count": 10,
+      "arithmetic_count": 5,
+      "call_count": 9,
+      "comparison_count": 1,
+      "loop_density": 0.25,
+      "branch_density": 0.0714,
+      "memory_density": 0.375,
+      "arithmetic_density": 0.0893,
+      "call_density": 0.1607
+    },
+    "strategy": "O2",
+    "flags": [
+      "-O2"
+    ],
+    "exec_time": 0.0621,
+    "compile_time": 0.814,
+    "binary_size": 39936
+  },
+  {
+    "timestamp": "2026-09-21T15:26:19",
+    "source": "9ba84ade_calls.cpp",
+    "features": {
+      "instruction_count": 56,
+      "basic_block_count": 4,
+      "function_count": 7,
+      "loop_count": 1,
+      "max_loop_depth": 1,
+      "branch_count": 4,
+      "load_count": 11,
+      "store_count": 10,
+      "arithmetic_count": 5,
+      "call_count": 9,
+      "comparison_count": 1,
+      "loop_density": 0.25,
+      "branch_density": 0.0714,
+      "memory_density": 0.375,
+      "arithmetic_density": 0.0893,
+      "call_density": 0.1607
+    },
+    "strategy": "O3",
+    "flags": [
+      "-O3"
+    ],
+    "exec_time": 0.0206,
+    "compile_time": 0.7651,
+    "binary_size": 39936
+  },
+  {
+    "timestamp": "2026-09-21T15:26:19",
+    "source": "9ba84ade_calls.cpp",
+    "features": {
+      "instruction_count": 56,
+      "basic_block_count": 4,
+      "function_count": 7,
+      "loop_count": 1,
+      "max_loop_depth": 1,
+      "branch_count": 4,
+      "load_count": 11,
+      "store_count": 10,
+      "arithmetic_count": 5,
+      "call_count": 9,
+      "comparison_count": 1,
+      "loop_density": 0.25,
+      "branch_density": 0.0714,
+      "memory_density": 0.375,
+      "arithmetic_density": 0.0893,
+      "call_density": 0.1607
+    },
+    "strategy": "APEX",
+    "flags": [
+      "-O2"
+    ],
+    "exec_time": 0.0603,
+    "compile_time": 0.7159,
+    "binary_size": 39936
   }
 ]
