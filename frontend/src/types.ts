@@ -13,10 +13,11 @@ export interface Metrics {
 }
 
 export interface Strategy {
-  name:      string;
-  passes:    string[];
-  reasoning: string[];
-  score:     number;
+  name:        string;
+  passes:      string[];
+  reasoning:   string[];
+  score:       number;
+  confidence?: string;
 }
 
 export interface BenchmarkEntry {
@@ -36,4 +37,15 @@ export interface ApexResult {
   strategy:   Strategy;
   benchmark:  BenchmarkEntry[];
   ir_snippet: string;
+}
+
+export interface HistoryEntry {
+  timestamp:    string;
+  source:       string;
+  features:     Record<string, number>;
+  strategy:     string;
+  flags:        string[];
+  exec_time:    number;
+  compile_time: number;
+  binary_size:  number;
 }

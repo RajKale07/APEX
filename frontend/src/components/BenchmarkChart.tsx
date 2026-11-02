@@ -1,162 +1,170 @@
+import { useState } from "react";
 import type { BenchmarkEntry } from "../types";
 
-interface Props { benchmark: BenchmarkEntry[] }
-
-const DISPLAY: Record<string, string> = {
-  O0: "No Opt", O1: "Light", O2: "Standard", O3: "Aggressive", APEX: "APEX",
-};
-
-const COLORS: Record<string, string> = {
-  O0: "#94a3b8", O1: "#3b82f6", O2: "#8b5cf6", O3: "#f97316", APEX: "#16a34a",
-};
-
-const LEVEL_WHEN: Record<string, string> = {
-  O0:   "Debugging — exact code behavior, no tricks",
-  O1:   "Dev builds — fast compile, decent speed",
-  O2:   "Production default — safe, well-tested",
-  O3:   "Compute-heavy — aggressive, can backfire",
-  APEX: "Adaptive — matched to this program's profile",
-};
-
-function ApexBox({ data }: { data: (BenchmarkEntry & { _best: boolean; _bestTime: number })[] }) {
-  const apex = data.find(d => d.strategy === "APEX");
-  const best = data.find(d => d._best);
-  if (!apex || !best) return null;
-
-  const diff   = Math.abs(Math.round(((apex.exec_time - best.exec_time) / best.exec_time) * 100));
-  const won    = apex.exec_time <= best.exec_time;
-
-  return (
-    <div className={`apex-box ${won ? "won" : "lost"}`}>
-      <div className="apex-box-title">
-        {won ? "⚡ Why APEX is faster" : "🔍 Why APEX isn't fastest here"}
-      </div>
-      {won ? (
-        <p>
-          APEX matched <code>{apex.flags}</code> to this program's IR profile and ran{" "}
-          <strong style={{ color: "var(--green)" }}>{diff}% faster</strong> than the next best option.
-        </p>
-      ) : (
-        <p>
-          APEX chose <code>{apex.flags}</code> but <strong>{DISPLAY[best.strategy]} ({best.flags})</strong> was{" "}
-          <strong style={{ color: "var(--amber)" }}>{diff}% faster</strong>. This result is recorded —
-          next time APEX sees a similar profile it will prefer <code>{best.flags}</code>.
-        </p>
-      )}
-      <div className="apex-stats">
-        <div className="apex-stat">
-          <span className="apex-stat-label">APEX time</span>
-          <span className="apex-stat-val" style={{ color: won ? "var(--green)" : "var(--red)" }}>
-            {apex.exec_time}s
-          </span>
-        </div>
-        {!won && (
-          <div className="apex-stat">
-            <span className="apex-stat-label">Best time</span>
-            <span className="apex-stat-val" style={{ color: "var(--green)" }}>
-              {best.exec_time}s ({DISPLAY[best.strategy]})
-            </span>
-          </div>
-        )}
-        <div className="apex-stat">
-          <span className="apex-stat-label">Flags used</span>
-          <span className="apex-stat-val"><code>{apex.flags}</code></span>
-        </div>
-      </div>
-    </div>
-  );
+interface Props {
+  benchmark: BenchmarkEntry[];
 }
 
+const STRAT_LABELS: Record<string, string> = {
+  O0:   "No Optimization (-O0)",
+  O1:   "Light (-O1)",
+  O2:   "Standard (-O2)",
+  O3:   "Aggressive (-O3)",
+  APEX: "APEX (Adaptive)",
+};
+
 export default function BenchmarkChart({ benchmark }: Props) {
+  const [copied, setCopied] = useState(false);
+
   const valid = benchmark.filter(b => !b.error && b.exec_time > 0);
   if (valid.length === 0) return null;
 
-  const best     = valid.reduce((a, b) => a.exec_time < b.exec_time ? a : b);
-  const maxTime  = Math.max(...valid.map(b => b.exec_time));
+  const best = valid.reduce((a, b) => a.exec_time < b.exec_time ? a : b);
+  const maxTime = Math.max(...valid.map(b => b.exec_time));
 
-  const data = valid.map(b => ({
-    ...b,
-    _best:     b.strategy === best.strategy,
-    _bestTime: best.exec_time,
-  }));
+  const apex = valid.find(b => b.strategy === "APEX");
+  const isApexWinner = apex && apex.strategy === best.strategy;
+
+  let comparisonStrategy = best;
+  let diffPercent = 0;
+
+  if (isApexWinner) {
+    const nonApex = valid.filter(b => b.strategy !== "APEX");
+    if (nonApex.length > 0) {
+      const runnerUp = nonApex.reduce((a, b) => a.exec_time < b.exec_time ? a : b);
+      comparisonStrategy = runnerUp;
+      diffPercent = Math.abs(Math.round(((runnerUp.exec_time - apex.exec_time) / runnerUp.exec_time) * 100));
+    }
+  } else if (apex) {
+    diffPercent = Math.abs(Math.round(((apex.exec_time - best.exec_time) / best.exec_time) * 100));
+  }
+
+  const stdoutOutput = valid.find(b => b.output)?.output ?? "";
+
+  const copyOutput = () => {
+    if (stdoutOutput) {
+      navigator.clipboard.writeText(stdoutOutput);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   return (
-    <div className="panel">
-      <div className="panel-header">
-        <span className="panel-title">
-          <span className="panel-title-icon">▣</span>
-          Benchmark Results
-        </span>
-        <span className="panel-badge">{valid.length} strategies</span>
+    <div className="card">
+      <div className="card-header">
+        <span className="card-title">Benchmark Results</span>
+        <span className="badge">{valid.length} strategies tested</span>
       </div>
 
-      {/* Horizontal bar chart */}
-      <div className="chart-area">
-        <div className="chart-subtitle">Execution time — lower is faster</div>
-        <div className="hbar-list">
-          {data.map(b => {
-            const pct  = (b.exec_time / maxTime) * 100;
-            const diff = b._best ? 0 : Math.round(((b.exec_time - b._bestTime) / b._bestTime) * 100);
-            return (
-              <div className="hbar-row" key={b.strategy}>
-                <span className="hbar-label">{DISPLAY[b.strategy] ?? b.strategy}</span>
-                <div className="hbar-track">
-                  <div
-                    className="hbar-fill"
-                    style={{
-                      width: `${pct}%`,
-                      background: COLORS[b.strategy] ?? "#475569",
-                      opacity: b._best ? 1 : 0.55,
-                    }}
-                  >
-                    <span className="hbar-time">{b.exec_time}s</span>
-                    {b._best && <span className="hbar-badge">fastest</span>}
-                    {!b._best && diff > 0 && <span className="hbar-badge">+{diff}%</span>}
+      <div className="card-body">
+        {/* Horizontal Bars Section */}
+        <div className="bars-section">
+          <div className="bars-header">
+            <span className="bars-desc">Execution time (seconds) — shorter bar is faster</span>
+            {isApexWinner && (
+              <span className="winner-tag">
+                ⚡ APEX is {diffPercent}% faster than {comparisonStrategy.strategy}
+              </span>
+            )}
+          </div>
+
+          <div className="bars-container">
+            {valid.map(item => {
+              const pct = Math.max(Math.round((item.exec_time / maxTime) * 100), 14);
+              const isBest = item.strategy === best.strategy;
+              const isApex = item.strategy === "APEX";
+
+              return (
+                <div key={item.strategy} className={`bar-row ${isBest ? "best-bar-row" : ""}`}>
+                  <div className="bar-label-area">
+                    <span className="bar-name">{item.strategy}</span>
+                    <span className="bar-sub">{STRAT_LABELS[item.strategy] ?? item.strategy}</span>
+                  </div>
+
+                  <div className="bar-track">
+                    <div
+                      className={`bar-fill ${isApex ? "fill-apex" : "fill-std"}`}
+                      style={{
+                        width: `${pct}%`,
+                        opacity: isBest ? 1 : isApex ? 0.9 : 0.6,
+                      }}
+                    >
+                      <span className="bar-value">{item.exec_time}s</span>
+                      {isBest && <span className="fastest-badge">fastest</span>}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      {/* APEX explanation */}
-      <ApexBox data={data as any} />
+        {/* Verdict Callout */}
+        <div className={`verdict-box ${isApexWinner ? "verdict-win" : ""}`}>
+          <div className="verdict-title">
+            {isApexWinner ? "⚡ Why APEX is faster" : "🔍 Strategy Feedback"}
+          </div>
+          <div className="verdict-body">
+            {isApexWinner ? (
+              <p>
+                APEX tailored <code>{apex?.flags}</code> to this program's IR profile and completed{" "}
+                <strong>{diffPercent}% faster</strong> than the next best compiler level ({comparisonStrategy.strategy} @ {comparisonStrategy.exec_time}s).
+              </p>
+            ) : (
+              <p>
+                APEX used <code>{apex?.flags}</code> ({apex?.exec_time}s), while <strong>{best.strategy}</strong> ({best.flags}) ran in <strong>{best.exec_time}s</strong>.
+                This outcome is recorded into <code>history.json</code> to improve future picks for similar programs.
+              </p>
+            )}
+          </div>
+        </div>
 
-      {/* Detail table */}
-      <div className="bench-table-wrap">
-        <table className="bench-table">
-          <thead>
-            <tr>
-              <th>Strategy</th>
-              <th>Use case</th>
-              <th>Flags</th>
-              <th>Run time</th>
-              <th>Compile</th>
-              <th>Binary</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map(b => (
-              <tr key={b.strategy} className={b._best ? "best-row" : ""}>
-                <td>
-                  <div className="strat-cell">
-                    <span className="strat-dot" style={{ background: COLORS[b.strategy] }} />
-                    <span className="strat-name">{DISPLAY[b.strategy] ?? b.strategy}</span>
-                    {b._best && <span className="best-pill">fastest</span>}
-                  </div>
-                </td>
-                <td style={{ fontSize: "0.72rem", color: "var(--text-3)", maxWidth: 180 }}>
-                  {LEVEL_WHEN[b.strategy] ?? "—"}
-                </td>
-                <td><span className="mono">{b.flags}</span></td>
-                <td><span className={`time-val ${b._best ? "time-best" : ""}`}>{b.exec_time}s</span></td>
-                <td><span className="time-val">{b.compile_time}s</span></td>
-                <td style={{ color: "var(--text-3)" }}>{(b.binary_size / 1024).toFixed(1)} KB</td>
+        {/* Data Table */}
+        <div className="table-responsive">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Strategy</th>
+                <th>Flags</th>
+                <th>Runtime</th>
+                <th>Compile</th>
+                <th>Binary Size</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {valid.map(item => {
+                const isBest = item.strategy === best.strategy;
+                return (
+                  <tr key={item.strategy} className={isBest ? "row-highlight" : ""}>
+                    <td>
+                      <div className="strategy-cell">
+                        <strong>{item.strategy}</strong>
+                        {isBest && <span className="fastest-pill">fastest</span>}
+                      </div>
+                    </td>
+                    <td><code className="code-tag">{item.flags}</code></td>
+                    <td><strong>{item.exec_time}s</strong></td>
+                    <td>{item.compile_time}s</td>
+                    <td>{(item.binary_size / 1024).toFixed(1)} KB</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Stdout Output Console */}
+        {stdoutOutput && (
+          <div className="stdout-wrapper">
+            <div className="stdout-top">
+              <span className="stdout-label">Program Output (stdout)</span>
+              <button className="copy-btn" onClick={copyOutput}>
+                {copied ? "Copied" : "Copy"}
+              </button>
+            </div>
+            <pre className="stdout-content">{stdoutOutput}</pre>
+          </div>
+        )}
       </div>
     </div>
   );

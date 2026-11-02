@@ -108,8 +108,8 @@ class TestRunExecutable(unittest.TestCase):
 
     def test_correct_output(self):
         r = run_executable(EXE)
-        # sum(0..999999) = 499999500000
-        self.assertIn("499999500000", r.stdout)
+        # benchmark/programs/test_loop.cpp output: 20833358300000000
+        self.assertIn("20833358300000000", r.stdout)
 
     def test_exit_code_zero(self):
         r = run_executable(EXE)
@@ -132,7 +132,7 @@ class TestFullPipeline(unittest.TestCase):
 
     def test_pipeline_correct_output(self):
         r = full_pipeline(SOURCE, ["-O2"])
-        self.assertIn("499999500000", r.run.stdout)
+        self.assertIn("20833358300000000", r.run.stdout)
 
     def test_pipeline_ir_file_exists(self):
         r = full_pipeline(SOURCE, ["-O2"])
@@ -151,7 +151,7 @@ class TestFullPipeline(unittest.TestCase):
     def test_pipeline_O3_also_works(self):
         r = full_pipeline(SOURCE, ["-O3"])
         self.assertTrue(r.success)
-        self.assertIn("499999500000", r.run.stdout)
+        self.assertIn("20833358300000000", r.run.stdout)
 
     def test_pipeline_bad_source_does_not_crash(self):
         r = full_pipeline("no_such_file.cpp", ["-O2"])

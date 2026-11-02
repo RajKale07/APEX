@@ -11,7 +11,7 @@ import subprocess
 import statistics
 import time
 
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
@@ -19,13 +19,12 @@ from typing import Optional
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from compiler.pipeline import compile_to_ir, MINGW_FLAGS
+from compiler.pipeline import compile_to_ir, MINGW_FLAGS, CLANG
 from analyzer.ir_analyzer import analyze, report as ir_report
 from analyzer.feature_extractor import extract
 from optimizer.rule_engine.decision_engine import decide
 from feedback.feedback_engine import record_from_benchmark, best_known_strategy
 
-CLANG = r"C:\Program Files\LLVM\bin\clang++.exe"
 BUILD = os.path.join(ROOT, "build")
 RUNS  = 7
 
@@ -40,12 +39,28 @@ app.add_middleware(
 
 
 def _compile_exe(source: str, exe: str, flags: list) -> float:
-    cmd = [CLANG] + MINGW_FLAGS + flags + [source, "-o", exe]
+    compiler = CLANG
+    cmd_flags = flags
+    if not os.path.exists(compiler):
+        # Fallback to MinGW GCC if available
+        gpp = r"C:\MinGW\bin\g++.exe"
+        if os.path.exists(gpp):
+            compiler = gpp
+            cmd_flags = [f for f in flags if not f.startswith("-Xclang")]
+        else:
+            raise RuntimeError(
+                f"Compiler not found at '{CLANG}'. Please install LLVM (run 'winget install LLVM.LLVM')."
+            )
+
+    cmd = [compiler] + MINGW_FLAGS + cmd_flags + [source, "-o", exe]
     t0 = time.perf_counter()
-    r  = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        r  = subprocess.run(cmd, capture_output=True, text=True, timeout=25)
+    except FileNotFoundError:
+        raise RuntimeError(f"Compiler executable '{compiler}' was not found.")
     t1 = time.perf_counter()
     if r.returncode != 0:
-        raise RuntimeError(r.stderr)
+        raise RuntimeError(r.stderr.strip())
     return round(t1 - t0, 4)
 
 
@@ -64,20 +79,31 @@ def _ensure_timer():
 def _run_exe(exe: str) -> tuple[float, str]:
     _ensure_timer()
     times = []
+    output = ""
     # Capture output separately via cmd /c (only once, not timed)
-    out_r = subprocess.run(f'cmd /c "{exe}"', shell=True, capture_output=True, text=True)
-    output = out_r.stdout.strip()
+    try:
+        out_r = subprocess.run(f'cmd /c "{exe}"', shell=True, capture_output=True, text=True, timeout=10)
+        output = out_r.stdout.strip()
+    except subprocess.TimeoutExpired:
+        return -1.0, "Execution timed out (>10s)"
+    except Exception as e:
+        output = str(e)
+
     for _ in range(RUNS):
-        r = subprocess.run(
-            [sys.executable, _TIMER_SCRIPT, exe],
-            capture_output=True, text=True
-        )
         try:
+            r = subprocess.run(
+                [sys.executable, _TIMER_SCRIPT, exe],
+                capture_output=True, text=True, timeout=10
+            )
             times.append(float(r.stdout.strip()))
-        except ValueError:
+        except Exception:
             return -1.0, output
+
+    if not times:
+        return -1.0, output
     times.sort()
-    return round(statistics.median(times[:-1]) / 1000, 4), output
+    chosen = times[:-1] if len(times) > 1 else times
+    return round(statistics.median(chosen) / 1000, 4), output
 
 
 def _run_pipeline(source_path: str) -> dict:
@@ -86,7 +112,10 @@ def _run_pipeline(source_path: str) -> dict:
     ir_file = os.path.splitext(source_path)[0] + ".ll"
 
     # Step 1: Generate IR
-    compile_to_ir(source_path, ir_file)
+    ir_res = compile_to_ir(source_path, ir_file)
+    if not ir_res.ok:
+        err_msg = ir_res.stderr.strip() or "Failed to compile source to LLVM IR"
+        raise RuntimeError(f"LLVM IR Generation Failed:\n{err_msg}")
 
     # Step 2: Analyze
     metrics  = analyze(ir_file)
@@ -115,7 +144,7 @@ def _run_pipeline(source_path: str) -> dict:
                 "flags":        " ".join(flags),
                 "compile_time": compile_time,
                 "exec_time":    exec_time,
-                "binary_size":  os.path.getsize(exe),
+                "binary_size":  os.path.getsize(exe) if os.path.exists(exe) else 0,
                 "output":       output,
             })
         except Exception as e:
@@ -125,8 +154,10 @@ def _run_pipeline(source_path: str) -> dict:
     record_from_benchmark(source_path, features, benchmark_results)
 
     # Read IR content for display
-    with open(ir_file, "r", errors="ignore") as f:
-        ir_content = f.read()
+    ir_content = ""
+    if os.path.exists(ir_file):
+        with open(ir_file, "r", errors="ignore") as f:
+            ir_content = f.read()
 
     return {
         "metrics":   {
@@ -156,27 +187,42 @@ def _run_pipeline(source_path: str) -> dict:
 
 @app.post("/api/analyze")
 async def analyze_code(
+    request: Request,
     file: Optional[UploadFile] = File(None),
     code: Optional[str]        = Form(None),
-    filename: Optional[str]    = Form("input.cpp"),
+    filename: Optional[str]    = Form(None),
 ):
-    """Accept either a file upload or pasted code, run full APEX pipeline."""
-    if file is not None:
-        content = await file.read()
-        code_str = content.decode("utf-8", errors="ignore")
-        fname = file.filename or filename
-    elif code:
-        code_str = code
-        fname = filename
-    else:
-        return {"error": "Provide either a file or code"}
+    """Accept either a file upload, form data, or JSON body, run full APEX pipeline."""
+    code_str = ""
+    fname = filename or "input.cpp"
+
+    content_type = request.headers.get("content-type", "")
+    if "application/json" in content_type:
+        try:
+            body = await request.json()
+            code_str = body.get("code", "")
+            fname = body.get("filename", fname)
+        except Exception:
+            pass
+
+    if not code_str:
+        if file is not None:
+            content = await file.read()
+            code_str = content.decode("utf-8", errors="ignore")
+            fname = file.filename or fname
+        elif code:
+            code_str = code
+
+    if not code_str or not code_str.strip():
+        return {"error": "Please provide C++ code to analyze (via code string or file upload)"}
 
     # Write to temp file
     tmp_dir = os.path.join(ROOT, "build", "tmp")
     os.makedirs(tmp_dir, exist_ok=True)
-    src_path = os.path.join(tmp_dir, f"{uuid.uuid4().hex[:8]}_{fname}")
+    safe_fname = os.path.basename(fname).replace(" ", "_")
+    src_path = os.path.join(tmp_dir, f"{uuid.uuid4().hex[:8]}_{safe_fname}")
 
-    with open(src_path, "w") as f:
+    with open(src_path, "w", encoding="utf-8") as f:
         f.write(code_str)
 
     try:
@@ -196,3 +242,8 @@ def get_history():
 @app.get("/api/health")
 def health():
     return {"status": "ok", "version": "1.0.0"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)
